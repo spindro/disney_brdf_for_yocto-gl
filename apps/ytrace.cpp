@@ -59,8 +59,7 @@ int main(int argc, char* argv[]) {
     auto app = new app_state();
 
     // parse command line
-    auto parser =
-        ygl::make_parser(argc, argv, "ytrace", "Offline oath tracing");
+    auto parser= ygl::make_parser(argc, argv, "ytrace", "Offline path tracing");
     app->params = ygl::parse_params(parser, "", app->params);
     app->batch_size = ygl::parse_opt(parser, "--batch-size", "",
         "Compute images in <val> samples batches", 16);
@@ -82,7 +81,6 @@ int main(int argc, char* argv[]) {
         ygl::log_fatal("cannot load scene {}", app->filename);
         return 1;
     }
-
     // add elements
     auto opts = ygl::add_elements_options();
     add_elements(app->scn, opts);

@@ -680,7 +680,7 @@ namespace ygl {}
 
 // enable glTF
 #ifndef YGL_GLTF
-#define YGL_GLTF 1
+#define YGL_GLTF 0
 #endif
 
 // enable SVG
@@ -5137,6 +5137,75 @@ enum struct material_type {
 };
 
 /// Material for surfaces, lines and triangles.
+//struct material {
+//    /// Name.
+//    std::string name = "";
+//    /// Double-sided rendering.
+//    bool double_sided = false;
+//    /// Material type.
+//    material_type type = material_type::specular_roughness;
+//
+//    /// Emission color. @refl_semantic(color) refl_uilimits(0,10000)
+//    vec3f ke = {0, 0, 0};
+//    /// Diffuse color / base color. @refl_semantic(color)
+//    vec3f kd = {0, 0, 0};
+//    /// Specular color / metallic factor. @refl_semantic(color)
+//    vec3f ks = {0, 0, 0};
+//    /// Clear coat reflection. @refl_semantic(color)
+//    vec3f kr = {0, 0, 0};
+//    /// Transmission color. @refl_semantic(color)
+//    vec3f kt = {0, 0, 0};
+//    /// Roughness.
+//    float rs = 0.0001;
+//    /// Opacity.
+//    float op = 1;
+//
+//    /// Emission texture. @refl_semantic(reference)
+//    texture* ke_txt = nullptr;
+//    /// Diffuse texture. @refl_semantic(reference)
+//    texture* kd_txt = nullptr;
+//    /// Specular texture. @refl_semantic(reference)
+//    texture* ks_txt = nullptr;
+//    /// Clear coat reflection texture. @refl_semantic(reference)
+//    texture* kr_txt = nullptr;
+//    /// Transmission texture. @refl_semantic(reference)
+//    texture* kt_txt = nullptr;
+//    /// Roughness texture. @refl_semantic(reference)
+//    texture* rs_txt = nullptr;
+//    /// Bump map texture (heighfield). @refl_semantic(reference)
+//    texture* bump_txt = nullptr;
+//    /// Displacement map texture (heighfield). @refl_semantic(reference)
+//    texture* disp_txt = nullptr;
+//    /// Normal texture. @refl_semantic(reference)
+//    texture* norm_txt = nullptr;
+//    /// Occlusion texture. @refl_semantic(reference)
+//    texture* occ_txt = nullptr;
+//
+//    /// Emission texture info.
+//    texture_info* ke_txt_info = nullptr;
+//    /// Diffuse texture info.
+//    texture_info* kd_txt_info = nullptr;
+//    /// Specular texture info.
+//    texture_info* ks_txt_info = nullptr;
+//    /// Clear coat reflection texture info.
+//    texture_info* kr_txt_info = nullptr;
+//    /// Transmission texture info.
+//    texture_info* kt_txt_info = nullptr;
+//    /// Roughness texture info.
+//    texture_info* rs_txt_info = nullptr;
+//    /// Bump map texture (heighfield) info.
+//    texture_info* bump_txt_info = nullptr;
+//    /// Displacement map texture (heighfield) info.
+//    texture_info* disp_txt_info = nullptr;
+//    /// Normal texture info.
+//    texture_info* norm_txt_info = nullptr;
+//    /// Occlusion texture info.
+//    texture_info* occ_txt_info = nullptr;
+//
+//    /// Cleanup.
+//    ~material();
+//};
+
 struct material {
     /// Name.
     std::string name = "";
@@ -5146,32 +5215,32 @@ struct material {
     material_type type = material_type::specular_roughness;
 
     /// Emission color. @refl_semantic(color) refl_uilimits(0,10000)
-    vec3f ke = {0, 0, 0};
-    /// Diffuse color / base color. @refl_semantic(color)
-    vec3f kd = {0, 0, 0};
-    /// Specular color / metallic factor. @refl_semantic(color)
-    vec3f ks = {0, 0, 0};
-    /// Clear coat reflection. @refl_semantic(color)
-    vec3f kr = {0, 0, 0};
-    /// Transmission color. @refl_semantic(color)
-    vec3f kt = {0, 0, 0};
-    /// Roughness.
-    float rs = 0.0001;
-    /// Opacity.
-    float op = 1;
+    vec3f emissionColor = {0, 0, 0};
+    vec3f baseColor = {0, 0, 0};
+    float metallic = 0;
+    float subsurface = 0;
+    float specular = 0.5;
+    float roughness = 0.5;
+    float specularTint = 0;
+    float anisotropic = 0;
+    float sheen = 0;
+    float sheenTint = 0.5;
+    float clearcoat = 0;
+    float clearcoatGloss = 1;
+    float opacity = 1;
 
     /// Emission texture. @refl_semantic(reference)
-    texture* ke_txt = nullptr;
+    texture* emissionColor_txt = nullptr;
     /// Diffuse texture. @refl_semantic(reference)
-    texture* kd_txt = nullptr;
+    texture* baseColor_txt = nullptr;
     /// Specular texture. @refl_semantic(reference)
-    texture* ks_txt = nullptr;
-    /// Clear coat reflection texture. @refl_semantic(reference)
-    texture* kr_txt = nullptr;
-    /// Transmission texture. @refl_semantic(reference)
-    texture* kt_txt = nullptr;
-    /// Roughness texture. @refl_semantic(reference)
-    texture* rs_txt = nullptr;
+//    texture* ks_txt = nullptr;
+//    /// Clear coat reflection texture. @refl_semantic(reference)
+//    texture* kr_txt = nullptr;
+//    /// Transmission texture. @refl_semantic(reference)
+//    texture* kt_txt = nullptr;
+//    /// Roughness texture. @refl_semantic(reference)
+//    texture* rs_txt = nullptr;
     /// Bump map texture (heighfield). @refl_semantic(reference)
     texture* bump_txt = nullptr;
     /// Displacement map texture (heighfield). @refl_semantic(reference)
@@ -5182,17 +5251,17 @@ struct material {
     texture* occ_txt = nullptr;
 
     /// Emission texture info.
-    texture_info* ke_txt_info = nullptr;
+    texture_info* emissionColor_txt_info = nullptr;
     /// Diffuse texture info.
-    texture_info* kd_txt_info = nullptr;
+    texture_info* baseColor_txt_info = nullptr;
     /// Specular texture info.
-    texture_info* ks_txt_info = nullptr;
-    /// Clear coat reflection texture info.
-    texture_info* kr_txt_info = nullptr;
-    /// Transmission texture info.
-    texture_info* kt_txt_info = nullptr;
-    /// Roughness texture info.
-    texture_info* rs_txt_info = nullptr;
+//    texture_info* ks_txt_info = nullptr;
+//    /// Clear coat reflection texture info.
+//    texture_info* kr_txt_info = nullptr;
+//    /// Transmission texture info.
+//    texture_info* kt_txt_info = nullptr;
+//    /// Roughness texture info.
+//    texture_info* rs_txt_info = nullptr;
     /// Bump map texture (heighfield) info.
     texture_info* bump_txt_info = nullptr;
     /// Displacement map texture (heighfield) info.
@@ -5205,7 +5274,6 @@ struct material {
     /// Cleanup.
     ~material();
 };
-
 /// Shape data represented as an indexed array. May contain only one of the
 /// points/lines/triangles/quads.
 struct shape {
@@ -5282,11 +5350,11 @@ struct environment {
     /// Transform frame.
     frame3f frame = identity_frame3f;
     /// Emission coefficient. @refl_uilimits(0,10000)
-    vec3f ke = {0, 0, 0};
+    vec3f emissionColor = {0, 0, 0};
     /// Emission texture. @refl_semantic(reference)
-    texture* ke_txt = nullptr;
+    texture* emissionColor_txt = nullptr;
     /// Emission texture info.
-    texture_info* ke_txt_info = nullptr;
+    texture_info* emissionColor_txt_info = nullptr;
 
     // Cleanup
     environment();
@@ -5665,32 +5733,46 @@ inline void visit(material& val, Visitor&& visitor) {
                                   "Double-sided rendering.", 0, 0, ""});
     visitor(val.type,
         visit_var{"type", visit_var_type::value, "Material type.", 0, 0, ""});
-    visitor(val.ke, visit_var{"ke", visit_var_type::color,
+    visitor(val.emissionColor, visit_var{"emissionColor", visit_var_type::color,
                         "Emission color. refl_uilimits(0,10000)", 0, 0, ""});
-    visitor(val.kd, visit_var{"kd", visit_var_type::color,
+    visitor(val.baseColor, visit_var{"baseColor", visit_var_type::color,
                         "Diffuse color / base color.", 0, 0, ""});
-    visitor(val.ks, visit_var{"ks", visit_var_type::color,
-                        "Specular color / metallic factor.", 0, 0, ""});
-    visitor(val.kr, visit_var{"kr", visit_var_type::color,
-                        "Clear coat reflection.", 0, 0, ""});
-    visitor(val.kt, visit_var{"kt", visit_var_type::color,
-                        "Transmission color.", 0, 0, ""});
     visitor(
-        val.rs, visit_var{"rs", visit_var_type::value, "Roughness.", 0, 0, ""});
+        val.metallic, visit_var{"metallic", visit_var_type::value, "metallic.", 0, 0, ""});
     visitor(
-        val.op, visit_var{"op", visit_var_type::value, "Opacity.", 0, 0, ""});
-    visitor(val.ke_txt, visit_var{"ke_txt", visit_var_type::reference,
+        val.subsurface, visit_var{"subsurface", visit_var_type::value, "subsurface.", 0, 0, ""});      
+    visitor(
+        val.specular, visit_var{"specular", visit_var_type::value, "specular.", 0, 0, ""});
+    visitor(
+        val.specularTint, visit_var{"specularTint", visit_var_type::value, "specularTint.", 0, 0, ""});
+    visitor(
+        val.roughness, visit_var{"roughness", visit_var_type::value, "roughness.", 0, 0, ""});
+    visitor(
+        val.anisotropic, visit_var{"anisotropic", visit_var_type::value, "anisotropic.", 0, 0, ""});
+    visitor(
+        val.sheen, visit_var{"sheen", visit_var_type::value, "sheen.", 0, 0, ""});
+    visitor(
+        val.sheenTint, visit_var{"sheenTint", visit_var_type::value, "sheenTint.", 0, 0, ""});      
+    visitor(
+        val.clearcoat, visit_var{"clearcoat", visit_var_type::value, "clearcoat.", 0, 0, ""});
+    visitor(
+        val.clearcoatGloss, visit_var{"clearcoatGloss", visit_var_type::value, "clearcoatGloss.", 0, 0, ""});
+    visitor(
+        val.roughness, visit_var{"roughness", visit_var_type::value, "roughness.", 0, 0, ""});
+    visitor(
+        val.opacity, visit_var{"opacity", visit_var_type::value, "opacity.", 0, 0, ""});
+    visitor(val.emissionColor_txt, visit_var{"emissionColor_txt", visit_var_type::reference,
                             "Emission texture.", 0, 0, ""});
-    visitor(val.kd_txt, visit_var{"kd_txt", visit_var_type::reference,
-                            "Diffuse texture.", 0, 0, ""});
-    visitor(val.ks_txt, visit_var{"ks_txt", visit_var_type::reference,
-                            "Specular texture.", 0, 0, ""});
-    visitor(val.kr_txt, visit_var{"kr_txt", visit_var_type::reference,
-                            "Clear coat reflection texture.", 0, 0, ""});
-    visitor(val.kt_txt, visit_var{"kt_txt", visit_var_type::reference,
-                            "Transmission texture.", 0, 0, ""});
-    visitor(val.rs_txt, visit_var{"rs_txt", visit_var_type::reference,
-                            "Roughness texture.", 0, 0, ""});
+    visitor(val.baseColor_txt, visit_var{"baseColor_txt", visit_var_type::reference,
+                            "Base texture.", 0, 0, ""});
+//    visitor(val.ks_txt, visit_var{"ks_txt", visit_var_type::reference,
+//                            "Specular texture.", 0, 0, ""});
+//    visitor(val.kr_txt, visit_var{"kr_txt", visit_var_type::reference,
+//                            "Clear coat reflection texture.", 0, 0, ""});
+//    visitor(val.kt_txt, visit_var{"kt_txt", visit_var_type::reference,
+//                            "Transmission texture.", 0, 0, ""});
+//    visitor(val.rs_txt, visit_var{"rs_txt", visit_var_type::reference,
+//                            "Roughness texture.", 0, 0, ""});
     visitor(val.bump_txt, visit_var{"bump_txt", visit_var_type::reference,
                               "Bump map texture (heighfield).", 0, 0, ""});
     visitor(
@@ -5700,19 +5782,19 @@ inline void visit(material& val, Visitor&& visitor) {
                               "Normal texture.", 0, 0, ""});
     visitor(val.occ_txt, visit_var{"occ_txt", visit_var_type::reference,
                              "Occlusion texture.", 0, 0, ""});
-    visitor(val.ke_txt_info, visit_var{"ke_txt_info", visit_var_type::value,
+    visitor(val.emissionColor_txt_info, visit_var{"emissionColor_txt_info", visit_var_type::value,
                                  "Emission texture info.", 0, 0, ""});
-    visitor(val.kd_txt_info, visit_var{"kd_txt_info", visit_var_type::value,
-                                 "Diffuse texture info.", 0, 0, ""});
-    visitor(val.ks_txt_info, visit_var{"ks_txt_info", visit_var_type::value,
-                                 "Specular texture info.", 0, 0, ""});
-    visitor(
-        val.kr_txt_info, visit_var{"kr_txt_info", visit_var_type::value,
-                             "Clear coat reflection texture info.", 0, 0, ""});
-    visitor(val.kt_txt_info, visit_var{"kt_txt_info", visit_var_type::value,
-                                 "Transmission texture info.", 0, 0, ""});
-    visitor(val.rs_txt_info, visit_var{"rs_txt_info", visit_var_type::value,
-                                 "Roughness texture info.", 0, 0, ""});
+    visitor(val.baseColor_txt_info, visit_var{"baseColor_txt_info", visit_var_type::value,
+                                 "Base texture info.", 0, 0, ""});
+//    visitor(val.ks_txt_info, visit_var{"ks_txt_info", visit_var_type::value,
+//                                 "Specular texture info.", 0, 0, ""});
+//    visitor(
+//        val.kr_txt_info, visit_var{"kr_txt_info", visit_var_type::value,
+//                             "Clear coat reflection texture info.", 0, 0, ""});
+//    visitor(val.kt_txt_info, visit_var{"kt_txt_info", visit_var_type::value,
+//                                 "Transmission texture info.", 0, 0, ""});
+//    visitor(val.rs_txt_info, visit_var{"rs_txt_info", visit_var_type::value,
+//                                 "Roughness texture info.", 0, 0, ""});
     visitor(val.bump_txt_info,
         visit_var{"bump_txt_info", visit_var_type::value,
             "Bump map texture (heighfield) info.", 0, 0, ""});
@@ -5799,11 +5881,11 @@ inline void visit(environment& val, Visitor&& visitor) {
         val.name, visit_var{"name", visit_var_type::value, "Name.", 0, 0, ""});
     visitor(val.frame, visit_var{"frame", visit_var_type::value,
                            "Transform frame.", 0, 0, ""});
-    visitor(val.ke, visit_var{"ke", visit_var_type::value,
+    visitor(val.emissionColor, visit_var{"emissionColor", visit_var_type::value,
                         "Emission coefficient.", 0, 10000, ""});
-    visitor(val.ke_txt, visit_var{"ke_txt", visit_var_type::reference,
+    visitor(val.emissionColor_txt, visit_var{"emissionColor_txt", visit_var_type::reference,
                             "Emission texture.", 0, 0, ""});
-    visitor(val.ke_txt_info, visit_var{"ke_txt_info", visit_var_type::value,
+    visitor(val.emissionColor_txt_info, visit_var{"emissionColor_txt_info", visit_var_type::value,
                                  "Emission texture info.", 0, 0, ""});
 }
 
@@ -6947,6 +7029,60 @@ struct obj_texture {
     std::vector<float> dataf;
 };
 
+///// Obj material.
+//struct obj_material {
+//    /// Name.
+//    std::string name;
+//    /// MTL illum mode.
+//    int illum = 0;
+//
+//    /// Emission color.
+//    vec3f ke = {0, 0, 0};
+//    /// Ambient color.
+//    vec3f ka = {0, 0, 0};
+//    /// Diffuse color.
+//    vec3f kd = {0, 0, 0};
+//    /// Specular color.
+//    vec3f ks = {0, 0, 0};
+//    /// Reflection color.
+//    vec3f kr = {0, 0, 0};
+//    /// Transmision color.
+//    vec3f kt = {0, 0, 0};
+//    /// Phong exponent for ks.
+//    float ns = 1;
+//    /// Index of refraction.
+//    float ior = 1;
+//    /// Opacity.
+//    float op = 1;
+//
+//    /// Emission texture.
+//    obj_texture_info ke_txt;
+//    /// Ambient texture.
+//    obj_texture_info ka_txt;
+//    /// Diffuse texture.
+//    obj_texture_info kd_txt;
+//    /// Specular texture.
+//    obj_texture_info ks_txt;
+//    /// Reflection texture.
+//    obj_texture_info kr_txt;
+//    /// Transmission texture.
+//    obj_texture_info kt_txt;
+//    /// Specular exponent texture.
+//    obj_texture_info ns_txt;
+//    /// Opacity texture.
+//    obj_texture_info op_txt;
+//    /// Index of refraction.
+//    obj_texture_info ior_txt;
+//    /// Bump map texture (heighfield).
+//    obj_texture_info bump_txt;
+//    /// Displacement map texture (heighfield).
+//    obj_texture_info disp_txt;
+//    /// Normal map texture.
+//    obj_texture_info norm_txt;
+//
+//    /// Properties not explicitly handled.
+//    std::unordered_map<std::string, std::vector<std::string>> props;
+//};
 /// Obj material.
 struct obj_material {
     /// Name.
@@ -6954,43 +7090,38 @@ struct obj_material {
     /// MTL illum mode.
     int illum = 0;
 
-    /// Emission color.
-    vec3f ke = {0, 0, 0};
-    /// Ambient color.
-    vec3f ka = {0, 0, 0};
-    /// Diffuse color.
-    vec3f kd = {0, 0, 0};
-    /// Specular color.
-    vec3f ks = {0, 0, 0};
-    /// Reflection color.
-    vec3f kr = {0, 0, 0};
-    /// Transmision color.
-    vec3f kt = {0, 0, 0};
-    /// Phong exponent for ks.
-    float ns = 1;
-    /// Index of refraction.
-    float ior = 1;
-    /// Opacity.
-    float op = 1;
-
+    vec3f emissionColor = {0, 0, 0};
+    vec3f baseColor = {0, 0, 0};
+    float metallic = 0;
+    float subsurface = 0;
+    float specular = 0.5;
+    float roughness = 0.5;
+    float specularTint = 0;
+    float anisotropic = 0;
+    float sheen = 0;
+    float sheenTint = 0.5;
+    float clearcoat = 0;
+    float clearcoatGloss = 1;
+    float opacity = 1;
+    
     /// Emission texture.
-    obj_texture_info ke_txt;
-    /// Ambient texture.
-    obj_texture_info ka_txt;
+    obj_texture_info emissionColor_txt;
+//    /// Ambient texture.
+//    obj_texture_info ka_txt;
     /// Diffuse texture.
-    obj_texture_info kd_txt;
-    /// Specular texture.
-    obj_texture_info ks_txt;
-    /// Reflection texture.
-    obj_texture_info kr_txt;
-    /// Transmission texture.
-    obj_texture_info kt_txt;
-    /// Specular exponent texture.
-    obj_texture_info ns_txt;
-    /// Opacity texture.
-    obj_texture_info op_txt;
-    /// Index of refraction.
-    obj_texture_info ior_txt;
+    obj_texture_info baseColor_txt;
+//    /// Specular texture.
+//    obj_texture_info ks_txt;
+//    /// Reflection texture.
+//    obj_texture_info kr_txt;
+//    /// Transmission texture.
+//    obj_texture_info kt_txt;
+//    /// Specular exponent texture.
+//    obj_texture_info ns_txt;
+//    /// Opacity texture.
+//    obj_texture_info op_txt;
+//    /// Index of refraction.
+//    obj_texture_info ior_txt;
     /// Bump map texture (heighfield).
     obj_texture_info bump_txt;
     /// Displacement map texture (heighfield).
@@ -8791,7 +8922,7 @@ struct gl_lights {
     /// light positions.
     std::vector<vec3f> pos;
     /// Light intensities.
-    std::vector<vec3f> ke;
+    std::vector<vec3f> emissionColor;
     /// Light types.
     std::vector<gl_light_type> type;
 };
@@ -9506,17 +9637,28 @@ void set_stdsurface_highlight(
 /// maps. Works for points/lines/triangles indicated by `etype`, (diffuse for
 /// points, Kajiya-Kay for lines, GGX/Phong for triangles). Material `type`
 /// matches the scene material type.
+//void set_stdsurface_material(gl_stdsurface_program& prog, material_type type,
+//    gl_elem_type etype, const vec3f& ke, const vec3f& kd, const vec3f& ks,
+//    float rs, float op, const gl_texture_info& ke_txt,
+//    const gl_texture_info& kd_txt, const gl_texture_info& ks_txt,
+//    const gl_texture_info& rs_txt, const gl_texture_info& norm_txt,
+//    const gl_texture_info& occ_txt, bool use_phong, bool double_sided,
+//    bool alpha_cutout);
+
 void set_stdsurface_material(gl_stdsurface_program& prog, material_type type,
-    gl_elem_type etype, const vec3f& ke, const vec3f& kd, const vec3f& ks,
-    float rs, float op, const gl_texture_info& ke_txt,
-    const gl_texture_info& kd_txt, const gl_texture_info& ks_txt,
-    const gl_texture_info& rs_txt, const gl_texture_info& norm_txt,
+    gl_elem_type etype, const vec3f& emissionColor, const vec3f& baseColor,
+    float subsurface, float specular, float roughness, float specularTint,
+    float anisotropic, float sheen, float sheenTint, float clearcoat,
+    float clearcoatGloss, float opacity,
+    const gl_texture_info& emissionColor_txt,
+    const gl_texture_info& baseColor_txt, const gl_texture_info& norm_txt,
     const gl_texture_info& occ_txt, bool use_phong, bool double_sided,
     bool alpha_cutout);
-
 /// Set constant material with emission `ke` and opacity `op`.
 void set_stdsurface_constmaterial(
     gl_stdsurface_program& prog, const vec3f& ke, float op);
+void set_stdsurface_constmaterial(
+    gl_stdsurface_program& prog, const vec3f& emissionColor, float opacity);
 
 /// Set vertex data with buffers for position pos, normals norm, texture
 /// coordinates texcoord, per-vertex color color and tangent space tangsp.

@@ -2,3 +2,6 @@ bin
 cmake
 tests
 build
+in
+out
+nbproject
