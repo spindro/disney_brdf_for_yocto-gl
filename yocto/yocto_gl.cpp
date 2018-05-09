@@ -103,7 +103,7 @@
 unsigned int imgui_extrafont_compressed_size();
 const unsigned int* imgui_extrafont_compressed_data();
 #endif
-#define PI 3.14159265359f
+
 // -----------------------------------------------------------------------------
 // IMPLEMENTATION FOR UI UTILITIES
 // -----------------------------------------------------------------------------
@@ -6340,19 +6340,19 @@ float SchlickFresnel(float u)
     return m2*m2*m; // pow(m,5)
 }
 float GTR1(float ndh, float a){
-    if (a >= 1) return 1/PI;
+    if (a >= 1) return 1/pif;
     float a2 = a*a;
     float t = 1 + (a2-1)*sqr(ndh);
-    return (a2-1) / (PI*log(a2)*t);
+    return (a2-1) / (pif*log(a2)*t);
 }
 float GTR2(float ndh, float a){
     float a2 = a*a;
     float t = 1 + (a2-1)*sqr(ndh);
-    return a2 / (PI * t*t);
+    return a2 / (pif * t*t);
 }
 float GTR2_aniso(float ndh, float hdx, float hdy, float ax, float ay)
 {
-  return 1 / (PI * ax*ay * sqr( sqr(hdx/ax) + sqr(hdy/ay) + sqr(ndh)));
+  return 1 / (pif * ax*ay * sqr( sqr(hdx/ax) + sqr(hdy/ay) + sqr(ndh)));
 
 }
 float smithG_GGX(float ndh, float alpha)
@@ -6419,12 +6419,12 @@ vec3f sample_gtr2_aniso(float rs, const vec2f& rn, float ax, float ay) {
 }
 
 // Evaluates the GTR1 pdf
-float sample_gtr1_pdf(float gloss, float wh){
+float sample_gtr1_pdf(float ndh, float a){
     // The sampling routine samples wh exactly from the GTR1 distribution.
     // Thus, the final value of the PDF is just the value of the
     // distribution for wh converted to a mesure with respect to the
     // surface normal.;
-    return GTR1(wh, gloss);
+    return GTR1(ndh, a);
 }
 // Sample the gtr1 distribution
 vec3f sample_gtr1(float rs, const vec2f& rn) {
@@ -6509,7 +6509,7 @@ struct trace_point {
     float clearcoat = 0;
     float clearcoatGloss = 1;
     float opacity = 0;            // opacity
-    bool has_brdf() const { return shp && baseColor + emissionColor!= zero3f; }
+    bool has_brdf() const { return shp && baseColor + emissionColor != zero3f; }
     vec3f rho() const { return vec3f{max_element_value(baseColor), specular, metallic};}
     vec3f brdf_weights() const {
         auto w = vec3f{max_element_value(baseColor), specular, metallic};
@@ -6530,8 +6530,12 @@ vec3f eval_disney(const trace_point& pt, const vec3f& wo, const vec3f& wi){
     auto odh = clamp(dot(wo,wh), -1.0f, 1.0f);
     auto idh = clamp(dot(wi,wh), -1.0f, 1.0f);
     
-    float a = max(0.001f, sqr(pt.roughness));
+    //float a = max(0.001f, sqr(pt.roughness));
+    
+    
+    float a = pt.roughness;
     float roughg = sqr(a*0.5f+0.5f);
+    //float roughg = max(0.0001f, a);
 
     vec3f Cdlin = mon2lin(pt.baseColor);
     float Cdlum = .3f*Cdlin[0] + .6*Cdlin[1]  + .1*Cdlin[2]; // luminance approx.
@@ -6565,11 +6569,12 @@ vec3f eval_disney(const trace_point& pt, const vec3f& wo, const vec3f& wi){
     vec3f Fs = lerp(Cspec0, vec3f(1), FH);
     
     float Gs;
-    //Gs  = smithG_GGX_aniso(ndi, dot(wi, tg), dot(wi, btg), ax, ay);
-    //Gs *= smithG_GGX_aniso(ndo, dot(wo, tg), dot(wo, btg), ax, ay);
-
-    Gs = smithG_GGX(ndi,roughg) * smithG_GGX(ndo,roughg); //better fresnel
-    
+#if 1
+    Gs  = smithG_GGX_aniso(ndi, dot(wi, tg), dot(wi, btg), ax, ay);
+    Gs *= smithG_GGX_aniso(ndo, dot(wo, tg), dot(wo, btg), ax, ay);
+#else
+    Gs = smithG_GGX(ndi,roughg) * smithG_GGX(ndo,roughg);
+#endif   
     // sheen
     vec3f Fsheen = FH * pt.sheen * Csheen * (1.0f - pt.metallic);
 
@@ -6578,10 +6583,10 @@ vec3f eval_disney(const trace_point& pt, const vec3f& wo, const vec3f& wi){
     float Fr = lerp(.04f, 1.0f, FH);
     float Gr = smithG_GGX(ndi, .25f) * smithG_GGX(ndo, .25f);
     //diffuse
-    vec3f diffuse = ((1.0f/PI) * lerp(Fd, ss, pt.subsurface)*Cdlin) * (1.0f - pt.metallic);
+    vec3f diffuse = ((1.0f/pif) * lerp(Fd, ss, pt.subsurface)*Cdlin) * (1.0f - pt.metallic);
     //specular
     vec3f specular = (Gs*Fs*Ds + vec3f(pt.clearcoat*Gr*Fr*Dr) + Fsheen);
-    return (diffuse + specular) * ndi;
+    return (diffuse + specular) * ndi ;
 }
 
 // Evaluates emission.
@@ -6671,7 +6676,7 @@ vec3f eval_point_brdfcos(const trace_point& pt, const vec3f& wo,
 
     auto ido = dot(wo, wi);
     brdfcos += pt.baseColor * (2 * ido + 1) / (2 * pif);
-//    if (wo == -wi && delta) brdfcos += pt.opacity;
+    if (wo == -wi && delta) brdfcos += vec3f(pt.opacity);
 
     assert(isfinite(brdfcos.x) && isfinite(brdfcos.y) && isfinite(brdfcos.z));
     return brdfcos;
@@ -6746,37 +6751,37 @@ float weight_disney(const trace_point& pt, const vec3f& wo,
     if (ndo > 0 && ndi > 0) {
         //diffuse
         pdf += weights.x * ndi / pif;
-#if 1
+#if 0
         //specular
         if (ndh > 0 && pt.roughness) {
             auto hdo = dot(wo, wh);
         
-#if 0
-            auto d = sample_ggx_pdf(pt.roughness, ndh);
+#if 1
+            auto d = sample_ggx_pdf(sqr(pt.roughness), ndh);
 #else           
             auto fp = make_frame_fromz(pt.pos, pt.norm);
             auto tg = transform_direction_inverse(fp, fp.x);
             auto btg = transform_direction_inverse(fp, fp.y);
             float aspect = sqrt(1 - pt.anisotropic * 0.9f);
-            float ax = max(.001f, sqr(max(0.001f, sqr(pt.roughness)) / aspect));
-            float ay = max(.001f, sqr(max(0.001f, sqr(pt.roughness)) * aspect));
+
+            float ax = max(.001f, sqr(pt.roughness) / aspect);
+            float ay = max(.001f, sqr(pt.roughness) * aspect);
             auto d = GTR2_aniso(ndh, dot(wh, tg), dot(wh, btg), ax, ay);
+           
 #endif
             pdf += weights.y * d / (4 * hdo);
             
         }
         // clearcoat
-        if (ndh > 0 && pt.clearcoatGloss) {
-            auto d = sample_gtr1_pdf(pt.clearcoatGloss, ndh);
+        if (ndh > 0 && pt.clearcoat) {
+            auto d = sample_gtr1_pdf(ndh, lerp(.1f,.001f, pt.clearcoatGloss));
             auto hdo = dot(wo, wh);
             pdf += d * ndh / (4 * hdo);
-            //pdf += weights.y * d / (4 * hdo);
+
         }
-        //mirror
-        if (!pt.roughness && delta) pdf += weights.y;
 #else
         //specular
-        if (ndh > 0 && pt.roughness) {
+        if (ndh > 0){// && pt.roughness) {
             auto clearcoatWeight = pt.clearcoat / (pt.clearcoat + 1.0f);
             
             auto fp = make_frame_fromz(pt.pos, pt.norm);
@@ -6784,19 +6789,28 @@ float weight_disney(const trace_point& pt, const vec3f& wo,
             auto btg = transform_direction_inverse(fp, fp.y);
 
             float aspect = sqrt(1 - pt.anisotropic * 0.9f);
-            float ax = max(.001f, sqr(max(0.001f, sqr(pt.roughness)) / aspect));
-            float ay = max(.001f, sqr(max(0.001f, sqr(pt.roughness)) * aspect));
+            float ax = max(.001f, sqr(pt.roughness) / aspect);
+            float ay = max(.001f, sqr(pt.roughness) * aspect);
             
             auto hdo = dot(wo, wh);
+#if 0        
+            auto d = lerp(smithG_GGX_aniso(ndh, dot(wh, tg), dot(wh, btg), ax, ay),
+                    GTR1(ndh,lerp(.1f,.001f, pt.clearcoatGloss)),clearcoatWeight);
             
-            auto d = lerp(clearcoatWeight,GTR2_aniso(ndh, dot(wh, tg), dot(wh, btg), ax, ay),
-                    GTR1(pt.clearcoatGloss, ndh));
-            
-            pdf += weights.y * d / (4 * hdo);
+            //pdf += weights.y * d * ndh / (4 * hdo);
+            pdf += d * ndh / (4 * hdo);
+#else
+        
+            auto dw = smithG_GGX(ndi, sqr(pt.roughness*0.5f+0.5f)) * 
+            GTR2_aniso(ndh, dot(wh, tg), dot(wh, btg), ax, ay) * 2.0f * ndi / ndo;
+            auto d = lerp(dw, GTR1(ndh,lerp(.1f,.001f, pt.clearcoatGloss)) * ndh / ndi, clearcoatWeight);
+            pdf += weights.y * d * 0.25f ;
+#endif
         }
+
+#endif
         //mirror
         if (!pt.roughness && delta) pdf += weights.y;
-#endif
         }
         if (wi == -wo && delta) pdf += weights.z;
 
@@ -7069,8 +7083,10 @@ trace_point eval_point(
 float weight_light(
     const trace_lights& lights, const trace_point& lpt, const trace_point& pt) {
     if (lpt.shp) {
-        auto dist = length(lpt.pos - pt.pos);
+        auto dist = max(0.00001f,length(lpt.pos - pt.pos));
+        //std::cout << "dist" << dist <<  std::endl;
         auto area = lights.shape_areas.at(lpt.shp);
+        //std::cout << "area" << area << std::endl;
         if (!lpt.shp->triangles.empty()) {
             return area * abs(dot(lpt.norm, normalize(lpt.pos - pt.pos))) /
                    (dist * dist);
@@ -7177,6 +7193,7 @@ vec3f trace_path(const scene* scn, const bvh_tree* bvh,
 
     // emission
     auto l = eval_emission(pt, wo);
+    //std::cout << "l: "<< l << std::endl;
     if (!pt.has_brdf() || lights.empty()){
       return l;
     }
@@ -7195,9 +7212,12 @@ vec3f trace_path(const scene* scn, const bvh_tree* bvh,
         auto& lgt = lights.lights[(int)(rll * lights.lights.size())];
         auto lpt = sample_light(lights, lgt, pt, rle, rluv);
         auto lw = weight_light(lights, lpt, pt) * (float)lights.size();
+        //std::cout << "lw: "<< lw  << std::endl;
         auto lwi = normalize(lpt.pos - pt.pos);
         auto lke = eval_emission(lpt, -lwi);
+        //std::cout << "lke: "<< lke  << std::endl;
         auto lbc = eval_brdfcos(pt, wo, lwi);
+        //std::cout << "lbc: "<< lbc  << std::endl;
         auto lld = lke * lbc * lw;
         if (lld != zero3f) {
             l += weight * lld * eval_transmission(scn, bvh, pt, lpt, params) *
@@ -7524,7 +7544,8 @@ void trace_sample(const scene* scn, const camera* cam, const bvh_tree* bvh,
     auto l = shader(scn, bvh, lights, pt, -ray.d, pxl, params);
 
     if (!isfinite(l.x) || !isfinite(l.y) || !isfinite(l.z)) {
-        log_error("NaN detected cazzo");
+        log_error("NaN detected");
+        exit (EXIT_FAILURE);
         return;
     }
     if (params.pixel_clamp > 0) l = clamplen(l, params.pixel_clamp);
