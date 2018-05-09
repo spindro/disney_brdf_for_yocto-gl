@@ -1,0 +1,174 @@
+newmtl floor_txt
+  illum 2
+  baseColor 1 1 1
+  map_baseColor grid.png
+  roughness 1
+  opacity 0
+
+newmtl mat000
+  illum 2
+  baseColor 0.996 0.999 0.981
+  metallic 1
+  subsurface .5
+  specular 1
+  roughness .0
+  specularTint .9
+  anisotropic .9
+  sheen .0
+  sheenTint .0
+  clearcoat .2
+  clearcoatGloss .9
+  opacity 0
+
+newmtl mat001
+  illum 2
+  baseColor 0.996 0.999 0.981
+  metallic 1
+  subsurface .5
+  specular 1
+  roughness .0
+  specularTint .9
+  anisotropic .9
+  sheen .0
+  sheenTint .0
+  clearcoat .2
+  clearcoatGloss .9
+  opacity 0
+
+newmtl mat002
+  illum 2
+  baseColor 0.001 0.001 0.008
+  metallic 1
+  subsurface .5
+  specular 1
+  roughness .0
+  specularTint .9
+  anisotropic .9
+  sheen .0
+  sheenTint .0
+  clearcoat .2
+  clearcoatGloss .9
+  opacity 0
+
+newmtl mat003
+  illum 2
+  baseColor 0.001 0.001 0.008
+  metallic 1
+  subsurface .5
+  specular 1
+  roughness .0
+  specularTint .9
+  anisotropic .9
+  sheen .0
+  sheenTint .0
+  clearcoat .2
+  clearcoatGloss .9
+  opacity 0
+
+newmtl mat004
+  illum 2
+  baseColor 0.965 0.008 0.004
+  metallic 1
+  subsurface .5
+  specular 1
+  roughness .0
+  specularTint .9
+  anisotropic .9
+  sheen .0
+  sheenTint .0
+  clearcoat .2
+  clearcoatGloss .9
+  opacity 0
+
+newmtl mat005
+  illum 2
+  baseColor 0.965 0.008 0.004
+  metallic 1
+  subsurface .5
+  specular 1
+  roughness .0
+  specularTint .9
+  anisotropic .9
+  sheen .0
+  sheenTint .0
+  clearcoat .2
+  clearcoatGloss .9
+  opacity 0
+
+newmtl mat006
+  illum 2
+  baseColor 0.992 0.929 0.004
+  metallic 1
+  subsurface .5
+  specular 1
+  roughness .0
+  specularTint .9
+  anisotropic .9
+  sheen .0
+  sheenTint .0
+  clearcoat .2
+  clearcoatGloss .9
+  opacity 0
+
+newmtl mat007
+  illum 2
+  baseColor 0.992 0.929 0.004
+  metallic 1
+  subsurface .5
+  specular 1
+  roughness .0
+  specularTint .9
+  anisotropic .9
+  sheen .0
+  sheenTint .0
+  clearcoat .2
+  clearcoatGloss .9
+  opacity 0
+
+newmtl mat008
+  illum 2
+  baseColor 0.122 0.498 0.788
+  metallic 1
+  subsurface .5
+  specular 1
+  roughness .0
+  specularTint .9
+  anisotropic .9
+  sheen .0
+  sheenTint .0
+  clearcoat .2
+  clearcoatGloss .9
+  opacity 0
+
+newmtl mat009
+  illum 2
+  baseColor 0.122 0.498 0.788
+  metallic 1
+  subsurface .5
+  specular 1
+  roughness .0
+  specularTint .9
+  anisotropic .9
+  sheen .0
+  sheenTint .0
+  clearcoat .2
+  clearcoatGloss .9
+  opacity 0
+
+newmtl pointlight01
+  illum 2
+  emissionColor 4000 4000  4000 
+  roughness 1
+  opacity 0
+
+newmtl pointlight02
+  illum 2
+  emissionColor 1000  1000  1000 
+  roughness 1
+  opacity 0
+
+newmtl pointlight03
+  illum 2
+  emissionColor 1000  1000  1000 
+  roughness 1
+  opacity 0

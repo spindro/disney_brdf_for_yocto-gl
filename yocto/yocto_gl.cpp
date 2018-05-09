@@ -6781,7 +6781,7 @@ float weight_disney(const trace_point& pt, const vec3f& wo,
         }
 #else
         //specular
-        if (ndh > 0){// && pt.roughness) {
+        if (ndh > 0 && (pt.roughness || pt.clearcoat)) {
             auto clearcoatWeight = pt.clearcoat / (pt.clearcoat + 1.0f);
             
             auto fp = make_frame_fromz(pt.pos, pt.norm);
