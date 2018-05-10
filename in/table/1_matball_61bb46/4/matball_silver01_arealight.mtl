@@ -9,14 +9,14 @@ newmtl silver01
   illum 2
   baseColor 0.38 0.733 0.275
   metallic .6
-  subsurface .0
+  subsurface 1
   specular 1
-  roughness .1
-  specularTint .3
+  roughness .05
+  specularTint 0
   anisotropic .0
   sheen .0
   sheenTint .5
-  clearcoat 0
+  clearcoat .0
   clearcoatGloss 1
   opacity 0
 

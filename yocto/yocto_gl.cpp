@@ -6510,11 +6510,11 @@ struct trace_point {
     float clearcoatGloss = 1;
     float opacity = 0;            // opacity
     bool has_brdf() const { return shp && baseColor + emissionColor != zero3f; }
-    vec3f rho() const { return vec3f{max_element_value(baseColor), specular, metallic};}
-    vec3f brdf_weights() const {
-        auto w = vec3f{max_element_value(baseColor), specular, metallic};
-        auto sw = w.x + w.y + w.z;
-        if (!sw) return zero3f;
+    vec3f rho() const { return vec3f{max_element_value(baseColor), specular, clearcoat};}
+    vec4f brdf_weights() const {
+        auto w = vec4f{max_element_value(baseColor), specular, clearcoat, metallic};
+        auto sw = w.x + w.y + w.z + w.w;
+        if (!sw) return zero4f;
         return w / sw;
     }
 };
@@ -6531,8 +6531,6 @@ vec3f eval_disney(const trace_point& pt, const vec3f& wo, const vec3f& wi){
     auto idh = clamp(dot(wi,wh), -1.0f, 1.0f);
     
     //float a = max(0.001f, sqr(pt.roughness));
-    
-    
     float a = pt.roughness;
     float roughg = sqr(a*0.5f+0.5f);
     //float roughg = max(0.0001f, a);
@@ -6569,7 +6567,7 @@ vec3f eval_disney(const trace_point& pt, const vec3f& wo, const vec3f& wi){
     vec3f Fs = lerp(Cspec0, vec3f(1), FH);
     
     float Gs;
-#if 1
+#if 0
     Gs  = smithG_GGX_aniso(ndi, dot(wi, tg), dot(wi, btg), ax, ay);
     Gs *= smithG_GGX_aniso(ndo, dot(wo, tg), dot(wo, btg), ax, ay);
 #else
@@ -6586,6 +6584,8 @@ vec3f eval_disney(const trace_point& pt, const vec3f& wo, const vec3f& wi){
     vec3f diffuse = ((1.0f/pif) * lerp(Fd, ss, pt.subsurface)*Cdlin) * (1.0f - pt.metallic);
     //specular
     vec3f specular = (Gs*Fs*Ds + vec3f(pt.clearcoat*Gr*Fr*Dr) + Fsheen);
+    
+    //std::cout << "DS:" << Ds << std::endl;
     return (diffuse + specular) * ndi ;
 }
 
@@ -6750,14 +6750,14 @@ float weight_disney(const trace_point& pt, const vec3f& wo,
     auto pdf = 0.0f;
     if (ndo > 0 && ndi > 0) {
         //diffuse
-        pdf += weights.x * ndi / pif;
-#if 0
+        pdf += weights.x * (1.0f - pt.metallic) * ndi / pif;
+#if 1
         //specular
         if (ndh > 0 && pt.roughness) {
             auto hdo = dot(wo, wh);
         
-#if 1
-            auto d = sample_ggx_pdf(sqr(pt.roughness), ndh);
+#if 0
+            auto d = sample_ggx_pdf(sqr(pt.roughness*0.5f+0.5f), ndh);
 #else           
             auto fp = make_frame_fromz(pt.pos, pt.norm);
             auto tg = transform_direction_inverse(fp, fp.x);
@@ -6769,6 +6769,7 @@ float weight_disney(const trace_point& pt, const vec3f& wo,
             auto d = GTR2_aniso(ndh, dot(wh, tg), dot(wh, btg), ax, ay);
            
 #endif
+            //test wihput weights.y
             pdf += weights.y * d / (4 * hdo);
             
         }
@@ -6776,14 +6777,14 @@ float weight_disney(const trace_point& pt, const vec3f& wo,
         if (ndh > 0 && pt.clearcoat) {
             auto d = sample_gtr1_pdf(ndh, lerp(.1f,.001f, pt.clearcoatGloss));
             auto hdo = dot(wo, wh);
-            pdf += d * ndh / (4 * hdo);
+            pdf += weights.z * d * ndh / (4 * hdo);
 
         }
 #else
         //specular
         if (ndh > 0 && (pt.roughness || pt.clearcoat)) {
-            auto clearcoatWeight = pt.clearcoat / (pt.clearcoat + 1.0f);
-            
+            //auto clearcoatWeight = pt.clearcoat / (pt.clearcoat + 1.0f);
+            auto clearcoatWeight = 1/(1 + pt.clearcoat);
             auto fp = make_frame_fromz(pt.pos, pt.norm);
             auto tg = transform_direction_inverse(fp, fp.x);
             auto btg = transform_direction_inverse(fp, fp.y);
@@ -6804,7 +6805,7 @@ float weight_disney(const trace_point& pt, const vec3f& wo,
             auto dw = smithG_GGX(ndi, sqr(pt.roughness*0.5f+0.5f)) * 
             GTR2_aniso(ndh, dot(wh, tg), dot(wh, btg), ax, ay) * 2.0f * ndi / ndo;
             auto d = lerp(dw, GTR1(ndh,lerp(.1f,.001f, pt.clearcoatGloss)) * ndh / ndi, clearcoatWeight);
-            pdf += weights.y * d * 0.25f ;
+            pdf += d * 0.25f ;
 #endif
         }
 
@@ -6812,7 +6813,7 @@ float weight_disney(const trace_point& pt, const vec3f& wo,
         //mirror
         if (!pt.roughness && delta) pdf += weights.y;
         }
-        if (wi == -wo && delta) pdf += weights.z;
+        //if (wi == -wo && delta) pdf += weights.z;
 
         assert(isfinite(pdf));
         if (!pdf) return 0;
@@ -6917,8 +6918,8 @@ std::tuple<vec3f, bool> sample_disney(
     else if (rnl < ratio_specular && pt.roughness) {
         auto fp = make_frame_fromz(pt.pos, pt.norm);
         float aspect = sqrt(1 - pt.anisotropic * 0.9f);
-        float ax = max(.001f, max(0.001f, sqr(pt.roughness))/aspect);
-        float ay = max(.001f, max(0.001f, sqr(pt.roughness))*aspect);
+        float ax = max(.001f, sqr(pt.roughness)/aspect);
+        float ay = max(.001f, sqr(pt.roughness)*aspect);
         auto wh_local = sample_gtr2_aniso(pt.roughness, rn, ax, ay);
         auto wh = transform_direction(fp, wh_local);
         return {normalize(wh * 2.0f * dot(wo, wh) - wo), false};
