@@ -22,15 +22,31 @@
 #./bin/ytrace -r 360 -s 256 -o out/table/0_matball_fefffa/6.png in/table/0_matball_fefffa/6/matball_silver01_arealight.obj
 
 #metallic
-./bin/ytrace -r 360 -s 256 -o out/table/1_matball_61bb46/1.png in/table/1_matball_61bb46/1/matball_silver01_arealight.obj
-./bin/ytrace -r 360 -s 256 -o out/table/1_matball_61bb46/2.png in/table/1_matball_61bb46/2/matball_silver01_arealight.obj
-./bin/ytrace -r 360 -s 256 -o out/table/1_matball_61bb46/3.png in/table/1_matball_61bb46/3/matball_silver01_arealight.obj
-./bin/ytrace -r 360 -s 256 -o out/table/1_matball_61bb46/4.png in/table/1_matball_61bb46/4/matball_silver01_arealight.obj
-./bin/ytrace -r 360 -s 256 -o out/table/1_matball_61bb46/5.png in/table/1_matball_61bb46/5/matball_silver01_arealight.obj
-./bin/ytrace -r 360 -s 256 -o out/table/1_matball_61bb46/6.png in/table/1_matball_61bb46/6/matball_silver01_arealight.obj
+#./bin/ytrace -r 360 -s 256 -o out/table/1_matball_61bb46/1.png in/table/1_matball_61bb46/1/matball_silver01_arealight.obj
+#./bin/ytrace -r 360 -s 256 -o out/table/1_matball_61bb46/2.png in/table/1_matball_61bb46/2/matball_silver01_arealight.obj
+#./bin/ytrace -r 360 -s 256 -o out/table/1_matball_61bb46/3.png in/table/1_matball_61bb46/3/matball_silver01_arealight.obj
+#./bin/ytrace -r 360 -s 256 -o out/table/1_matball_61bb46/4.png in/table/1_matball_61bb46/4/matball_silver01_arealight.obj
+#./bin/ytrace -r 360 -s 256 -o out/table/1_matball_61bb46/5.png in/table/1_matball_61bb46/5/matball_silver01_arealight.obj
+#./bin/ytrace -r 360 -s 256 -o out/table/1_matball_61bb46/6.png in/table/1_matball_61bb46/6/matball_silver01_arealight.obj
 
-#./bin/ytrace -r 360 -s 256 -o in/table/1_matball_61bb46
-#./bin/ytrace -r 360 -s 256 -o in/table/2_matball_fdb827
+#specular
+./bin/ytrace -r 360 -s 256 -o out/table/2_matball_fdb827/1.png in/table/2_matball_fdb827/1/matball_silver01_arealight.obj
+./bin/ytrace -r 360 -s 256 -o out/table/2_matball_fdb827/2.png in/table/2_matball_fdb827/2/matball_silver01_arealight.obj
+./bin/ytrace -r 360 -s 256 -o out/table/2_matball_fdb827/3.png in/table/2_matball_fdb827/3/matball_silver01_arealight.obj
+./bin/ytrace -r 360 -s 256 -o out/table/2_matball_fdb827/4.png in/table/2_matball_fdb827/4/matball_silver01_arealight.obj
+./bin/ytrace -r 360 -s 256 -o out/table/2_matball_fdb827/5.png in/table/2_matball_fdb827/5/matball_silver01_arealight.obj
+./bin/ytrace -r 360 -s 256 -o out/table/2_matball_fdb827/6.png in/table/2_matball_fdb827/6/matball_silver01_arealight.obj
+
+
+#specular tint
+./bin/ytrace -r 360 -s 256 -o out/table/2_matball_fdb827/7.png in/table/2_matball_fdb827/7/matball_silver01_arealight.obj
+./bin/ytrace -r 360 -s 256 -o out/table/2_matball_fdb827/8.png in/table/2_matball_fdb827/8/matball_silver01_arealight.obj
+./bin/ytrace -r 360 -s 256 -o out/table/2_matball_fdb827/9.png in/table/2_matball_fdb827/9/matball_silver01_arealight.obj
+./bin/ytrace -r 360 -s 256 -o out/table/2_matball_fdb827/10.png in/table/2_matball_fdb827/10/matball_silver01_arealight.obj
+./bin/ytrace -r 360 -s 256 -o out/table/2_matball_fdb827/11.png in/table/2_matball_fdb827/11/matball_silver01_arealight.obj
+./bin/ytrace -r 360 -s 256 -o out/table/2_matball_fdb827/12.png in/table/2_matball_fdb827/12/matball_silver01_arealight.obj
+
+
 #./bin/ytrace -r 360 -s 256 -o in/table/3_matball_f5821f
 #./bin/ytrace -r 360 -s 256 -o in/table/4_matball_e03a3e
 #./bin/ytrace -r 360 -s 256 -o in/table/5_matball_963d97
