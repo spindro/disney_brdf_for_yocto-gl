@@ -6530,8 +6530,8 @@ vec3f eval_disney(const trace_point& pt, const vec3f& wo, const vec3f& wi){
 
 #if 1
     vec3f Ctint = Cdlum > 0 ? Cdlin/Cdlum : vec3f(1); // normalize lum. to isolate hue+sat
-    vec3f Cmetal = pt.specular*.1f*lerp(vec3f(1), Ctint, pt.specularTint);
-    vec3f Cspec0 = lerp(Cmetal, Cdlin, pt.metallic);
+    vec3f Cmetal = pt.specular*.08f*lerp(vec3f(1), Ctint, pt.specularTint);
+    vec3f Cspec0 = lerp(Cmetal, Ctint, pt.metallic);
 #else   
     vec3f Ctint = Cdlum > 0.0f ? pt.baseColor / Cdlum : vec3f(1);
     vec3f Cmetal = pt.specular * .08f * lerp(vec3f(1), Ctint, pt.specularTint);
@@ -6930,7 +6930,8 @@ std::tuple<vec3f, bool> sample_disney(
     // sample according to clearcoat
     else if (rnl > ratio_specular ){
         auto fp = make_frame_fromz(pt.pos, pt.norm);
-        auto wh_local = sample_gtr1(lerp(.1f,.001f, pt.clearcoatGloss), rn);
+        //auto wh_local = sample_gtr1(lerp(.1f,.001f, pt.clearcoatGloss), rn);
+        auto wh_local = sample_gtr1(pt.clearcoatGloss, rn);
         auto wh = transform_direction(fp, wh_local);
         return {normalize(wh * 2.0f * dot(wo, wh) - wo), false};
     }

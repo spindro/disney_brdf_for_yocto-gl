@@ -8,14 +8,14 @@ newmtl floor_txt
 newmtl silver01
   illum 2
   baseColor 0.878 0.227 0.243
-  metallic .9
+  metallic .8
   subsurface .0
-  specular 1
+  specular .8
   roughness .2
   specularTint .0
   anisotropic .8
   sheen .2
-  sheenTint 5
+  sheenTint .5
   clearcoat .0
   clearcoatGloss 1
   opacity 0
