@@ -1,0 +1,40 @@
+newmtl floor_txt
+  illum 2
+  baseColor 1 1 1
+  map_baseColor grid.png
+  roughness 1
+  opacity 0
+
+newmtl silver01
+  illum 2
+  baseColor 0.0 0.616 0.863
+  metallic .5
+  subsurface .0
+  specular 1
+  roughness .0
+  specularTint .0
+  anisotropic .0
+  sheen .0
+  sheenTint 1
+  clearcoat 1
+  clearcoatGloss .2
+  opacity 0
+
+newmtl matte00
+  illum 2
+  baseColor 0.2 0.2 0.2
+  roughness 1
+  opacity 0
+
+newmtl arealight01
+  illum 2
+  emissionColor 80 80 80
+  roughness 1
+  opacity 0
+
+newmtl arealight02
+  illum 2
+  emissionColor 20 20 20
+  roughness 1
+  opacity 0
+

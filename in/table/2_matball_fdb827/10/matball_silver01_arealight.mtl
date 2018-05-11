@@ -15,7 +15,7 @@ newmtl silver01
   specularTint .6
   anisotropic .0
   sheen .0
-  sheenTint .5
+  sheenTint 1
   clearcoat .0
   clearcoatGloss 1
   opacity 0

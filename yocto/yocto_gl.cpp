@@ -6528,12 +6528,18 @@ vec3f eval_disney(const trace_point& pt, const vec3f& wo, const vec3f& wi){
     vec3f Cdlin = mon2lin(pt.baseColor);
     float Cdlum = .3f*Cdlin[0] + .6*Cdlin[1]  + .1*Cdlin[2]; // luminance approx.
 
+#if 1
     vec3f Ctint = Cdlum > 0 ? Cdlin/Cdlum : vec3f(1); // normalize lum. to isolate hue+sat
-    //vec3f Cspec0 = lerp(pt.specular*.08f*lerp(vec3f(1), Ctint, pt.specularTint), Cdlin, pt.metallic);
-    vec3f Cspec0 = lerp(pt.specular*.2f*lerp(vec3f(1), Ctint, pt.specularTint), Cdlin, pt.metallic);
+    vec3f Cmetal = pt.specular*.1f*lerp(vec3f(1), Ctint, pt.specularTint);
+    vec3f Cspec0 = lerp(Cmetal, Cdlin, pt.metallic);
+#else   
+    vec3f Ctint = Cdlum > 0.0f ? pt.baseColor / Cdlum : vec3f(1);
+    vec3f Cmetal = pt.specular * .08f * lerp(vec3f(1), Ctint, pt.specularTint);
+    vec3f Cspec0 = lerp(Cmetal, pt.baseColor, pt.metallic);
+#endif    
+    
     vec3f Csheen = lerp(vec3f(1), Ctint, pt.sheenTint);
-
-
+    
     float FL = SchlickFresnel(ndi);
     float FV = SchlickFresnel(ndo);
     
@@ -6745,7 +6751,6 @@ float weight_disney(const trace_point& pt, const vec3f& wo,
 
 #if 1
         //specular
-        //if (ndh > 0 && pt.roughness) {
         if (ndh > 0) {
             auto hdo = dot(wo, wh);
         
@@ -6759,13 +6764,11 @@ float weight_disney(const trace_point& pt, const vec3f& wo,
 
             float ax = max(.001f, sqr(pt.roughness) / aspect);
             float ay = max(.001f, sqr(pt.roughness) * aspect);
-            auto d = GTR2_aniso(ndh, dot(wh, tg), dot(wh, btg), ax, ay);
-           
+            auto d = GTR2_aniso(ndh, dot(wh, tg), dot(wh, btg), ax, ay);          
 #endif
-
             pdf += weights.y * d * ndh * ndi / (4 * hdo);
- 
-            
+//            pdf += weights.y * d * ndi / (4 * hdo);
+    
         }
         // clearcoat
         if (ndh > 0 && pt.clearcoat) {
