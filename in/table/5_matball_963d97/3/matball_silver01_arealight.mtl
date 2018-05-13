@@ -11,7 +11,7 @@ newmtl silver01
   metallic .5
   subsurface .0
   specular .2
-  roughness .0
+  roughness .2
   specularTint .0
   anisotropic .0
   sheen .4

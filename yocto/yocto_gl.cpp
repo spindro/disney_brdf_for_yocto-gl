@@ -6517,11 +6517,15 @@ vec3f eval_disney(const trace_point& pt, const vec3f& wo, const vec3f& wi){
     auto wh = normalize(wo + wi);
     if (ndo < 0 || ndi < 0) return zero3f;
 
-    auto ndh = clamp(dot(pt.norm,wh), -1.0f, 1.0f);
-    auto odh = clamp(dot(wo,wh), -1.0f, 1.0f);
-    auto idh = clamp(dot(wi,wh), -1.0f, 1.0f);
+    //auto ndh = clamp(dot(pt.norm,wh), -1.0f, 1.0f);
+    //auto odh = clamp(dot(wo,wh), -1.0f, 1.0f);
+    //auto idh = clamp(dot(wi,wh), -1.0f, 1.0f);
     
-
+    auto ndh = dot(pt.norm,wh);
+    auto odh = dot(wo,wh);
+    auto idh = dot(wi,wh);
+    
+    
     float a = pt.roughness;
     float roughg = sqr(a*0.5f+0.5f);
 
@@ -6530,12 +6534,14 @@ vec3f eval_disney(const trace_point& pt, const vec3f& wo, const vec3f& wi){
 
 #if 1
     vec3f Ctint = Cdlum > 0 ? Cdlin/Cdlum : vec3f(1); // normalize lum. to isolate hue+sat
-    vec3f Cmetal = pt.specular*.08f*lerp(vec3f(1), Ctint, pt.specularTint);
-    vec3f Cspec0 = lerp(Cmetal, Ctint, pt.metallic);
+    vec3f Cmetal = pt.specular*.08f*lerp(vec3f(1), Ctint, pt.metallic);
+    vec3f Cspec0 = lerp(Cmetal, Ctint, pt.specularTint);
 #else   
     vec3f Ctint = Cdlum > 0.0f ? pt.baseColor / Cdlum : vec3f(1);
     vec3f Cmetal = pt.specular * .08f * lerp(vec3f(1), Ctint, pt.specularTint);
     vec3f Cspec0 = lerp(Cmetal, pt.baseColor, pt.metallic);
+           lerp(metallicWeight,
+
 #endif    
     
     vec3f Csheen = lerp(vec3f(1), Ctint, pt.sheenTint);
@@ -6930,8 +6936,7 @@ std::tuple<vec3f, bool> sample_disney(
     // sample according to clearcoat
     else if (rnl > ratio_specular ){
         auto fp = make_frame_fromz(pt.pos, pt.norm);
-        //auto wh_local = sample_gtr1(lerp(.1f,.001f, pt.clearcoatGloss), rn);
-        auto wh_local = sample_gtr1(pt.clearcoatGloss, rn);
+        auto wh_local = sample_gtr1(lerp(.1f,.001f, pt.clearcoatGloss), rn);
         auto wh = transform_direction(fp, wh_local);
         return {normalize(wh * 2.0f * dot(wo, wh) - wo), false};
     }
@@ -7084,10 +7089,10 @@ trace_point eval_point(
 float weight_light(
     const trace_lights& lights, const trace_point& lpt, const trace_point& pt) {
     if (lpt.shp) {
-        auto dist = max(0.00001f,length(lpt.pos - pt.pos));
-        //std::cout << "dist" << dist <<  std::endl;
+        auto dist = length(lpt.pos - pt.pos);
+
         auto area = lights.shape_areas.at(lpt.shp);
-        //std::cout << "area" << area << std::endl;
+
         if (!lpt.shp->triangles.empty()) {
             return area * abs(dot(lpt.norm, normalize(lpt.pos - pt.pos))) /
                    (dist * dist);

@@ -14,8 +14,8 @@ newmtl silver01
   roughness .0
   specularTint .0
   anisotropic .0
-  sheen .2
-  sheenTint .5
+  sheen .1
+  sheenTint 1
   clearcoat .0
   clearcoatGloss 1
   opacity 0
