@@ -5233,14 +5233,6 @@ struct material {
     texture* emissionColor_txt = nullptr;
     /// Diffuse texture. @refl_semantic(reference)
     texture* baseColor_txt = nullptr;
-    /// Specular texture. @refl_semantic(reference)
-//    texture* ks_txt = nullptr;
-//    /// Clear coat reflection texture. @refl_semantic(reference)
-//    texture* kr_txt = nullptr;
-//    /// Transmission texture. @refl_semantic(reference)
-//    texture* kt_txt = nullptr;
-//    /// Roughness texture. @refl_semantic(reference)
-//    texture* rs_txt = nullptr;
     /// Bump map texture (heighfield). @refl_semantic(reference)
     texture* bump_txt = nullptr;
     /// Displacement map texture (heighfield). @refl_semantic(reference)
@@ -5254,14 +5246,7 @@ struct material {
     texture_info* emissionColor_txt_info = nullptr;
     /// Diffuse texture info.
     texture_info* baseColor_txt_info = nullptr;
-    /// Specular texture info.
-//    texture_info* ks_txt_info = nullptr;
-//    /// Clear coat reflection texture info.
-//    texture_info* kr_txt_info = nullptr;
-//    /// Transmission texture info.
-//    texture_info* kt_txt_info = nullptr;
-//    /// Roughness texture info.
-//    texture_info* rs_txt_info = nullptr;
+
     /// Bump map texture (heighfield) info.
     texture_info* bump_txt_info = nullptr;
     /// Displacement map texture (heighfield) info.
@@ -5765,14 +5750,6 @@ inline void visit(material& val, Visitor&& visitor) {
                             "Emission texture.", 0, 0, ""});
     visitor(val.baseColor_txt, visit_var{"baseColor_txt", visit_var_type::reference,
                             "Base texture.", 0, 0, ""});
-//    visitor(val.ks_txt, visit_var{"ks_txt", visit_var_type::reference,
-//                            "Specular texture.", 0, 0, ""});
-//    visitor(val.kr_txt, visit_var{"kr_txt", visit_var_type::reference,
-//                            "Clear coat reflection texture.", 0, 0, ""});
-//    visitor(val.kt_txt, visit_var{"kt_txt", visit_var_type::reference,
-//                            "Transmission texture.", 0, 0, ""});
-//    visitor(val.rs_txt, visit_var{"rs_txt", visit_var_type::reference,
-//                            "Roughness texture.", 0, 0, ""});
     visitor(val.bump_txt, visit_var{"bump_txt", visit_var_type::reference,
                               "Bump map texture (heighfield).", 0, 0, ""});
     visitor(
@@ -5786,15 +5763,6 @@ inline void visit(material& val, Visitor&& visitor) {
                                  "Emission texture info.", 0, 0, ""});
     visitor(val.baseColor_txt_info, visit_var{"baseColor_txt_info", visit_var_type::value,
                                  "Base texture info.", 0, 0, ""});
-//    visitor(val.ks_txt_info, visit_var{"ks_txt_info", visit_var_type::value,
-//                                 "Specular texture info.", 0, 0, ""});
-//    visitor(
-//        val.kr_txt_info, visit_var{"kr_txt_info", visit_var_type::value,
-//                             "Clear coat reflection texture info.", 0, 0, ""});
-//    visitor(val.kt_txt_info, visit_var{"kt_txt_info", visit_var_type::value,
-//                                 "Transmission texture info.", 0, 0, ""});
-//    visitor(val.rs_txt_info, visit_var{"rs_txt_info", visit_var_type::value,
-//                                 "Roughness texture info.", 0, 0, ""});
     visitor(val.bump_txt_info,
         visit_var{"bump_txt_info", visit_var_type::value,
             "Bump map texture (heighfield) info.", 0, 0, ""});
@@ -7106,22 +7074,8 @@ struct obj_material {
     
     /// Emission texture.
     obj_texture_info emissionColor_txt;
-//    /// Ambient texture.
-//    obj_texture_info ka_txt;
     /// Diffuse texture.
     obj_texture_info baseColor_txt;
-//    /// Specular texture.
-//    obj_texture_info ks_txt;
-//    /// Reflection texture.
-//    obj_texture_info kr_txt;
-//    /// Transmission texture.
-//    obj_texture_info kt_txt;
-//    /// Specular exponent texture.
-//    obj_texture_info ns_txt;
-//    /// Opacity texture.
-//    obj_texture_info op_txt;
-//    /// Index of refraction.
-//    obj_texture_info ior_txt;
     /// Bump map texture (heighfield).
     obj_texture_info bump_txt;
     /// Displacement map texture (heighfield).

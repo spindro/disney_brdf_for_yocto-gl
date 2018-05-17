@@ -4242,34 +4242,6 @@ scene* obj_to_scene(const obj_scene* obj, const load_options& opts) {
         mat->norm_txt_info = make_texture_info(omat->norm_txt);
         mat->bump_txt_info = make_texture_info(omat->bump_txt);
         mat->disp_txt_info = make_texture_info(omat->disp_txt);
-//        switch (omat->illum) {
-//            case 0:  // Color on and Ambient off
-//            case 1:  // Color on and Ambient on
-//            case 2:  // Highlight on
-//            case 3:  // Reflection on and Ray trace on
-//                mat->op = 1;
-//                mat->kt = {0, 0, 0};
-//                break;
-//            case 4:  // Transparency: Glass on
-//                // Reflection: Ray trace on
-//                break;
-//            case 5:  // Reflection: Fresnel on and Ray trace on
-//                mat->op = 1;
-//                mat->kt = {0, 0, 0};
-//                break;
-//            case 6:  // Transparency: Refraction on
-//                     // Reflection: Fresnel off and Ray trace on
-//            case 7:  // Transparency: Refraction on
-//                // Reflection: Fresnel on and Ray trace on
-//                break;
-//            case 8:  // Reflection on and Ray trace off
-//                mat->op = 1;
-//                mat->kt = {0, 0, 0};
-//                break;
-//            case 9:  // Transparency: Glass on
-//                // Reflection: Ray trace off
-//                break;
-//        }
         scn->materials.push_back(mat);
         mmap[mat->name] = mat;
     }
@@ -6516,10 +6488,6 @@ vec3f eval_disney(const trace_point& pt, const vec3f& wo, const vec3f& wi){
     auto ndi = dot(pt.norm, wi);
     auto wh = normalize(wo + wi);
     if (ndo < 0 || ndi < 0) return zero3f;
-
-    //auto ndh = clamp(dot(pt.norm,wh), -1.0f, 1.0f);
-    //auto odh = clamp(dot(wo,wh), -1.0f, 1.0f);
-    //auto idh = clamp(dot(wi,wh), -1.0f, 1.0f);
     
     auto ndh = dot(pt.norm,wh);
     auto odh = dot(wo,wh);
@@ -6532,17 +6500,9 @@ vec3f eval_disney(const trace_point& pt, const vec3f& wo, const vec3f& wi){
     vec3f Cdlin = mon2lin(pt.baseColor);
     float Cdlum = .3f*Cdlin[0] + .6*Cdlin[1]  + .1*Cdlin[2]; // luminance approx.
 
-#if 1
     vec3f Ctint = Cdlum > 0 ? Cdlin/Cdlum : vec3f(1); // normalize lum. to isolate hue+sat
     vec3f Cmetal = pt.specular*.08f*lerp(vec3f(1), Ctint, pt.metallic);
     vec3f Cspec0 = lerp(Cmetal, Ctint, pt.specularTint);
-#else   
-    vec3f Ctint = Cdlum > 0.0f ? pt.baseColor / Cdlum : vec3f(1);
-    vec3f Cmetal = pt.specular * .08f * lerp(vec3f(1), Ctint, pt.specularTint);
-    vec3f Cspec0 = lerp(Cmetal, pt.baseColor, pt.metallic);
-           lerp(metallicWeight,
-
-#endif    
     
     vec3f Csheen = lerp(vec3f(1), Ctint, pt.sheenTint);
     
@@ -6646,14 +6606,14 @@ vec3f eval_emission(const trace_point& pt, const vec3f& wo) {
 //         sh = sqrt(clamp(1 - ndh * ndh, 0.0f, 1.0f));
 //
 //    if (si > 0 && so > 0) {
-//        brdfcos += pt.kd * si / pif;
-//        if (sh > 0 && pt.rs) {
-//            auto ns = 2 / (pt.rs * pt.rs) - 2;
+//        brdfcos += pt.baseColor * si / pif;
+//        if (sh > 0 && pt.roughness) {
+//            auto ns = 2 / (pt.roughness * pt.roughness) - 2;
 //            auto d = (ns + 2) * pow(sh, ns) / (2 + pif);
-//            brdfcos += pt.ks * si * d / (4.0f * si * so);
+//            brdfcos += pt.roughness * si * d / (4.0f * si * so);
 //        }
 //    }
-//    if (wo == -wi && delta) brdfcos += pt.kt;
+//    if (wo == -wi && delta) brdfcos += pt.baseColor;
 //
 //    assert(isfinite(brdfcos.x) && isfinite(brdfcos.y) && isfinite(brdfcos.z));
 //    return brdfcos;
@@ -6672,6 +6632,7 @@ vec3f eval_emission(const trace_point& pt, const vec3f& wo) {
 //    assert(isfinite(brdfcos.x) && isfinite(brdfcos.y) && isfinite(brdfcos.z));
 //    return brdfcos;
 //}
+
 vec3f eval_point_brdfcos(const trace_point& pt, const vec3f& wo,
     const vec3f& wi, bool delta = false) {
     auto brdfcos = zero3f;
@@ -6699,28 +6660,6 @@ vec3f eval_brdfcos(const trace_point& pt, const vec3f& wo, const vec3f& wi,
 }
 
 // Compute the weight for sampling the BRDF
-//float weight_ggx_brdfcos(const trace_point& pt, const vec3f& wo,
-//    const vec3f& wi, bool delta = false) {
-//    auto weights = pt.brdf_weights();
-//    auto wh = normalize(wi + wo);
-//    auto ndo = dot(pt.norm, wo), ndi = dot(pt.norm, wi), ndh = dot(pt.norm, wh);
-//
-//    auto pdf = 0.0f;
-//    if (ndo > 0 && ndi > 0) {
-//        pdf += weights.x * ndi / pif;
-//        if (ndh > 0 && pt.rs) {
-//            auto d = sample_ggx_pdf(pt.rs, ndh);
-//            auto hdo = dot(wo, wh);
-//            pdf += weights.y * d / (4 * hdo);
-//        }
-//        if (!pt.rs && delta) pdf += weights.y;
-//    }
-//    if (wi == -wo && delta) pdf += weights.z;
-//
-//    assert(isfinite(pdf));
-//    if (!pdf) return 0;
-//    return 1 / pdf;
-//}
 float weight_ggx_brdfcos(const trace_point& pt, const vec3f& wo,
     const vec3f& wi, bool delta = false) {
     auto weights = pt.brdf_weights();
@@ -6759,10 +6698,7 @@ float weight_disney(const trace_point& pt, const vec3f& wo,
         //specular
         if (ndh > 0) {
             auto hdo = dot(wo, wh);
-        
-#if 0
-            auto d = sample_ggx_pdf(sqr(pt.roughness*0.5f+0.5f), ndh);
-#else           
+          
             auto fp = make_frame_fromz(pt.pos, pt.norm);
             auto tg = transform_direction_inverse(fp, fp.x);
             auto btg = transform_direction_inverse(fp, fp.y);
@@ -6771,22 +6707,20 @@ float weight_disney(const trace_point& pt, const vec3f& wo,
             float ax = max(.001f, sqr(pt.roughness) / aspect);
             float ay = max(.001f, sqr(pt.roughness) * aspect);
             auto d = GTR2_aniso(ndh, dot(wh, tg), dot(wh, btg), ax, ay);          
-#endif
-            pdf += weights.y * d * ndh * ndi / (4 * hdo);
-//            pdf += weights.y * d * ndi / (4 * hdo);
-    
+            
+            pdf += weights.y * d * ndh / (4 * hdo);    
         }
         // clearcoat
         if (ndh > 0 && pt.clearcoat) {
             auto d = GTR1(ndh, lerp(.1f,.001f, pt.clearcoatGloss));
             auto hdo = dot(wo, wh);
-            pdf += weights.z * d * ndh * ndi / (4 * hdo);
+            pdf += d * ndh  / (4 * hdo);
 
 
         }
 #else
         //specular
-        if (ndh > 0 && (pt.roughness || pt.clearcoat)) {
+        if (ndh > 0) {
             //auto clearcoatWeight = pt.clearcoat / (pt.clearcoat + 1.0f);
             auto clearcoatWeight = 1/(1 + pt.clearcoat);
             auto fp = make_frame_fromz(pt.pos, pt.norm);
@@ -6798,30 +6732,18 @@ float weight_disney(const trace_point& pt, const vec3f& wo,
             float ay = max(.001f, sqr(pt.roughness) * aspect);
             
             auto hdo = dot(wo, wh);
-#if 0        
-            auto d = lerp(smithG_GGX_aniso(ndh, dot(wh, tg), dot(wh, btg), ax, ay),
+            
+            auto d = lerp(GTR2_aniso(ndh, dot(wh, tg), dot(wh, btg), ax, ay),
                     GTR1(ndh,lerp(.1f,.001f, pt.clearcoatGloss)),clearcoatWeight);
             
-            ///pdf += weights.y * d * ndh / (4 * hdo);
-            pdf += d * ndh / (4 * hdo);
-#else
-        
-            auto dw = smithG_GGX(ndi, sqr(pt.roughness*0.5f+0.5f)) * 
-            GTR2_aniso(ndh, dot(wh, tg), dot(wh, btg), ax, ay) * 2.0f * ndi / ndo;
-            auto d = lerp(dw, GTR1(ndh,lerp(.1f,.001f, pt.clearcoatGloss)) * ndh / ndi, clearcoatWeight);
-            pdf += d * 0.25f ;
-            
-#endif
+            pdf += weights.y * d * ndh / (4 * hdo);
         }
 #endif
-        //mirror
-        //if (!pt.roughness && delta) pdf += weights.y;
-        }
-        //if (wi == -wo && delta) pdf += weights.z;
+    }
 
-        assert(isfinite(pdf));
-        if (!pdf) return 0;
-        return 1 / pdf;
+    assert(isfinite(pdf));
+    if (!pdf) return 0;
+    return 1 / pdf;
 }
 
 // Compute the weight for sampling the BRDF
@@ -6919,7 +6841,6 @@ std::tuple<vec3f, bool> sample_disney(
         return {transform_direction(fp, wi_local), false};
     }
     // sample according to specular GGX
-    //else if ((rnl < ratio_specular) && pt.roughness) {
     else if ((rnl < ratio_specular)) {
         auto fp = make_frame_fromz(pt.pos, pt.norm);
         float aspect = sqrt(1 - pt.anisotropic * 0.9f);
@@ -6929,10 +6850,6 @@ std::tuple<vec3f, bool> sample_disney(
         auto wh = transform_direction(fp, wh_local);
         return {normalize(wh * 2.0f * dot(wo, wh) - wo), false};
     }
-    // sample according to specular mirror
-    //else if ((rnl < ratio_specular) && !pt.roughness) {
-    //    return {normalize(pt.norm * 2.0f * dot(wo, pt.norm) - wo), true};
-    // }
     // sample according to clearcoat
     else if (rnl > ratio_specular ){
         auto fp = make_frame_fromz(pt.pos, pt.norm);
@@ -6947,6 +6864,7 @@ std::tuple<vec3f, bool> sample_disney(
 
     return {zero3f, false};
 }
+
 // Picks a direction based on the BRDF
 //std::tuple<vec3f, bool> sample_kajiyakay_brdfcos(
 //    const trace_point& pt, const vec3f& wo, float rnl, const vec2f& rn) {
@@ -7270,67 +7188,67 @@ vec3f trace_path(const scene* scn, const bvh_tree* bvh,
 }
 
 // Recursive path tracing.
-//vec3f trace_path_nomis(const scene* scn, const bvh_tree* bvh,
-//    const trace_lights& lights, const trace_point& pt_, const vec3f& wo_,
-//    trace_pixel& pxl, const trace_params& params) {
-//    // emission
-//    auto pt = pt_;
-//    auto wo = wo_;
-//
-//    auto l = eval_emission(pt, wo);
-//    if (!pt.has_brdf() || lights.empty()) return l;
-//
-//    // trace path
-//    auto weight = vec3f{1, 1, 1};
-//    auto emission = false;
-//    for (auto bounce = 0; bounce < params.max_depth; bounce++) {
-//        // emission
-//        if (emission) l += weight * eval_emission(pt, wo);
-//
-//        // direct
-//        auto rll = sample_next1f(pxl, params.rng, params.nsamples);
-//        auto rle = sample_next1f(pxl, params.rng, params.nsamples);
-//        auto rluv = sample_next2f(pxl, params.rng, params.nsamples);
-//        auto& lgt = lights.lights[(int)(rll * lights.lights.size())];
-//        auto lpt = sample_light(lights, lgt, pt, rle, rluv);
-//        auto lwi = normalize(lpt.pos - pt.pos);
-//        auto ld = eval_emission(lpt, -lwi) * eval_brdfcos(pt, wo, lwi) *
-//                  weight_light(lights, lpt, pt) * (float)lights.size();
-//        if (ld != zero3f) {
-//            l += weight * ld * eval_transmission(scn, bvh, pt, lpt, params);
-//        }
-//
-//        // skip recursion if path ends
-//        if (bounce == params.max_depth - 1) break;
-//
-//        // roussian roulette
-//        if (bounce > 2) {
-//            auto rrprob = 1.0f - min(max_element_value(pt.rho()), 0.95f);
-//            if (sample_next1f(pxl, params.rng, params.nsamples) < rrprob) break;
-//            weight *= 1 / (1 - rrprob);
-//        }
-//
-//        // continue path
-//        auto rbl = sample_next1f(pxl, params.rng, params.nsamples);
-//        auto rbuv = sample_next2f(pxl, params.rng, params.nsamples);
-//        auto bwi = zero3f;
-//        auto bdelta = false;
-//        std::tie(bwi, bdelta) = sample_brdfcos(pt, wo, rbl, rbuv);
-//        weight *= eval_brdfcos(pt, wo, bwi, bdelta) *
-//                  weight_brdfcos(pt, wo, bwi, bdelta);
-//        if (weight == zero3f) break;
-//
-//        auto bpt = intersect_scene(scn, bvh, make_ray(pt.pos, bwi));
-//        emission = false;
-//        if (!bpt.has_brdf()) break;
-//
-//        // continue path
-//        pt = bpt;
-//        wo = -bwi;
-//    }
-//
-//    return l;
-//}
+vec3f trace_path_nomis(const scene* scn, const bvh_tree* bvh,
+    const trace_lights& lights, const trace_point& pt_, const vec3f& wo_,
+    trace_pixel& pxl, const trace_params& params) {
+    // emission
+    auto pt = pt_;
+    auto wo = wo_;
+
+    auto l = eval_emission(pt, wo);
+    if (!pt.has_brdf() || lights.empty()) return l;
+
+    // trace path
+    auto weight = vec3f{1, 1, 1};
+    auto emission = false;
+    for (auto bounce = 0; bounce < params.max_depth; bounce++) {
+        // emission
+        if (emission) l += weight * eval_emission(pt, wo);
+
+        // direct
+        auto rll = sample_next1f(pxl, params.rng, params.nsamples);
+        auto rle = sample_next1f(pxl, params.rng, params.nsamples);
+        auto rluv = sample_next2f(pxl, params.rng, params.nsamples);
+        auto& lgt = lights.lights[(int)(rll * lights.lights.size())];
+        auto lpt = sample_light(lights, lgt, pt, rle, rluv);
+        auto lwi = normalize(lpt.pos - pt.pos);
+        auto ld = eval_emission(lpt, -lwi) * eval_brdfcos(pt, wo, lwi) *
+                  weight_light(lights, lpt, pt) * (float)lights.size();
+        if (ld != zero3f) {
+            l += weight * ld * eval_transmission(scn, bvh, pt, lpt, params);
+        }
+
+        // skip recursion if path ends
+        if (bounce == params.max_depth - 1) break;
+
+        // roussian roulette
+        if (bounce > 2) {
+            auto rrprob = 1.0f - min(max_element_value(pt.rho()), 0.95f);
+            if (sample_next1f(pxl, params.rng, params.nsamples) < rrprob) break;
+            weight *= 1 / (1 - rrprob);
+        }
+
+        // continue path
+        auto rbl = sample_next1f(pxl, params.rng, params.nsamples);
+        auto rbuv = sample_next2f(pxl, params.rng, params.nsamples);
+        auto bwi = zero3f;
+        auto bdelta = false;
+        std::tie(bwi, bdelta) = sample_brdfcos(pt, wo, rbl, rbuv);
+        weight *= eval_brdfcos(pt, wo, bwi, bdelta) *
+                  weight_brdfcos(pt, wo, bwi, bdelta);
+        if (weight == zero3f) break;
+
+        auto bpt = intersect_scene(scn, bvh, make_ray(pt.pos, bwi));
+        emission = false;
+        if (!bpt.has_brdf()) break;
+
+        // continue path
+        pt = bpt;
+        wo = -bwi;
+    }
+
+    return l;
+}
 
 // Recursive path tracing.
 vec3f trace_path_hack(const scene* scn, const bvh_tree* bvh,
@@ -7503,14 +7421,14 @@ using trace_filter = float (*)(float);
 
 // map to convert trace samplers
 static auto trace_shaders = std::unordered_map<trace_shader_type, trace_shader>{
-    //{trace_shader_type::eyelight, trace_eyelight},
-    //{trace_shader_type::direct, trace_direct},
+    {trace_shader_type::eyelight, trace_eyelight},
+    {trace_shader_type::direct, trace_direct},
     {trace_shader_type::pathtrace, trace_path},
-    //{trace_shader_type::pathtrace, trace_direct},
-    //{trace_shader_type::pathtrace_nomis, trace_path_nomis},
-    //{trace_shader_type::debug_albedo, trace_debug_albedo},
-    //{trace_shader_type::debug_normal, trace_debug_normal},
-    //{trace_shader_type::debug_texcoord, trace_debug_texcoord},
+    {trace_shader_type::pathtrace, trace_direct},
+    {trace_shader_type::pathtrace_nomis, trace_path_nomis},
+    {trace_shader_type::debug_albedo, trace_debug_albedo},
+    {trace_shader_type::debug_normal, trace_debug_normal},
+    {trace_shader_type::debug_texcoord, trace_debug_texcoord},
 };
 
 // map to convert trace filters
@@ -7987,7 +7905,6 @@ std::vector<obj_material*> load_mtl(const std::string& filename, bool flip_tr,
     // open file
     auto fs = std::fstream(filename, std::ios_base::in);
     if (!fs) throw std::runtime_error("cannot open filename " + filename);
-    // fs.exceptions(ios_base::failbit);
 
     // add a material preemptively to avoid crashes
     materials.push_back(new obj_material());
@@ -8039,39 +7956,10 @@ std::vector<obj_material*> load_mtl(const std::string& filename, bool flip_tr,
             ss >> mat->clearcoatGloss;
         } else if (cmd == "opacity") {
             ss >> mat->opacity;
-//            while (ss && ntok < 3) ss >> mat->kt[ntok++];
-//            if (ntok < 3) mat->kt = {mat->kt.x, mat->kt.x, mat->kt.x};
-//        } else if (cmd == "Tr") {
-//            auto ntok = 0;
-//            while (ss) ss >> mat->kt[ntok++];
-//            if (ntok < 3) {
-//                materials.back()->op = (flip_tr) ? 1 - mat->kt.x : mat->kt.x;
-//                mat->kt = {0, 0, 0};
-//            }
-//        } else if (cmd == "Ns") {
-//            ss >> mat->ns;
-//        } else if (cmd == "d") {
-//            ss >> mat->op;
-//        } else if (cmd == "Ni") {
-//            ss >> mat->ior;
         } else if (cmd == "map_emissionColor") {
             ss >> mat->emissionColor_txt;
-//        } else if (cmd == "map_Ka") {
-//            ss >> mat->ka_txt;
         } else if (cmd == "map_baseColor") {
             ss >> mat->baseColor_txt;
-//        } else if (cmd == "map_Ks") {
-//            ss >> mat->ks_txt;
-//        } else if (cmd == "map_Kr") {
-//            ss >> mat->kr_txt;
-//        } else if (cmd == "map_Tr") {
-//            ss >> mat->kt_txt;
-//        } else if (cmd == "map_Ns") {
-//            ss >> mat->ns_txt;
-//        } else if (cmd == "map_d") {
-//            ss >> mat->op_txt;
-//        } else if (cmd == "map_Ni") {
-//            ss >> mat->ior_txt;
         } else if (cmd == "map_bump" || cmd == "bump") {
             ss >> mat->bump_txt;
         } else if (cmd == "map_disp" || cmd == "disp") {
@@ -8101,14 +7989,7 @@ std::vector<obj_material*> load_mtl(const std::string& filename, bool flip_tr,
     };
     for (auto mat : materials) {
         add_texture(mat->emissionColor_txt);
-//        add_texture(mat->ka_txt);
         add_texture(mat->baseColor_txt);
-//        add_texture(mat->ks_txt);
-//        add_texture(mat->kr_txt);
-//        add_texture(mat->kt_txt);
-//        add_texture(mat->ns_txt);
-//        add_texture(mat->op_txt);
-//        add_texture(mat->ior_txt);
         add_texture(mat->bump_txt);
         add_texture(mat->bump_txt);
         add_texture(mat->disp_txt);
@@ -8432,21 +8313,6 @@ void save_mtl(const std::string& filename,
     for (auto mat : materials) {
         fs << "newmtl " << mat->name << '\n';
         fs << "  illum " << mat->illum << '\n';
-
-//        if (mat->emissionColor != zero3f) fs << "  emissionColor " << mat->emissionColor << '\n';
-//        if (mat->baseColor != zero3f) fs << "  baseColor " << mat->baseColor << '\n';
-//        if (mat->metallic != 0.f) fs << "  metallic " << mat->metallic << '\n';
-//        if (mat->subsurface != 0.f) fs << "  subsurface " << mat->subsurface << '\n';
-//        if (mat->specular != 0.f) fs << "  specular " << mat->specular << '\n';
-//        if (mat->roughness != 0.f) fs << "  roughness " << mat->roughness << '\n';
-//        if (mat->specularTint != 0.f) fs << "  specularTint " << mat->specularTint << '\n';
-//        if (mat->anisotropic != 0.f) fs << "  anisotropic " << mat->anisotropic << '\n';
-//        if (mat->sheen != zero3f) fs << "  sheen " << mat->sheen << '\n';
-//        if (mat->sheenTint != zero3f) fs << "  sheenTint " << mat->sheenTint << '\n';
-//        if (mat->clearcoat != zero3f) fs << "  clearcoat " << mat->clearcoat << '\n';
-//        if (mat->clearcoatGloss != zero3f) fs << "  clearcoatGloss " << mat->clearcoatGloss << '\n';
-//        if (mat->opacity != zero3f) fs << "  opacity " << mat->opacity << '\n';
-
         fs << "  metallic " << mat->metallic << '\n';
         fs << "  subsurface " << mat->subsurface << '\n';
         fs << "  specular " << mat->specular << '\n';
@@ -8460,7 +8326,6 @@ void save_mtl(const std::string& filename,
         fs << "  opacity " << mat->opacity << '\n';
 
         if (mat->emissionColor_txt.path != "") fs << "  map_emissionColor" << mat->emissionColor_txt << '\n';
-//        if (mat->ka_txt.path != "") fs << "  map_Ka " << mat->ka_txt << '\n';
         if (mat->baseColor_txt.path != "") fs << "  map_baseColor " << mat->baseColor_txt << '\n';
         if (mat->bump_txt.path != "")
             fs << "  map_bump " << mat->bump_txt << '\n';
@@ -13113,6 +12978,7 @@ void clear_gl_shapes(std::unordered_map<shape*, gl_shape>& gshapes) {
 //    }
 //    return lights;
 //}
+
 // Initialize gl lights
 gl_lights make_gl_lights(const scene* scn) {
     auto lights = gl_lights();
